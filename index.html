@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Kismet Editor</title>
+    <link rel="stylesheet" href="css/demo.css">
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.css">
+    <link rel="stylesheet" href="dist/css/medium-editor.css">
+    <link rel="stylesheet" href="dist/css/themes/default.css" id="medium-editor-theme">
+</head>
+<body>
+    <div id="container">
+        <h1>Kismet Editor</h1>
+		<p><h3>Upload File  <input type="file" id="input" multiple></h3>
+        <div class="editable">
+<p>tags hello, world;
+<p>status hi:
+<p>&nbsp;&nbsp;&nbsp;+++(hello,goodbye).
+        </div>
+    </div>
+    <script src="dist/js/medium-editor.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+		// Function to download data to a file
+		function download(data, filename, type) {
+			var file = new Blob([data], {type: type});
+			if (window.navigator.msSaveOrOpenBlob) // IE10+
+				window.navigator.msSaveOrOpenBlob(file, filename);
+			else { // Others
+				var a = document.createElement("a"),
+						url = URL.createObjectURL(file);
+				a.href = url;
+				a.download = filename;
+				document.body.appendChild(a);
+				a.click();
+				setTimeout(function() {
+					document.body.removeChild(a);
+					window.URL.revokeObjectURL(url);  
+				}, 0); 
+			}
+		}
+		function textToHTML(text){
+		
+			text = text.replaceAll(/\t/ig,'    ')
+			text = text.replaceAll(/\n/ig,'<p>')
+			text = text.replaceAll(/ /ig,'&nbsp;')
+			return text
+		}
+		
+        var editor = new MediumEditor('.editable', {
+            buttonLabels: 'fontawesome'
+        }),
+        cssLink = document.getElementById('medium-editor-theme');
+		const inputElement = document.getElementById("input");
+		inputElement.addEventListener("change", handleFiles, false);
+		function handleFiles() {
+			const fileList = this.files; /* now you can work with the file list */
+			var reader = new FileReader();
+			reader.onload = function (e) {
+				output = e.target.result;
+				$(".editable").html(textToHTML(output))
+				editor.events.updateInput(	$(".editable")[0],{inputType: "Nothing"})
+			};//end onload()
+			reader.readAsText(fileList[0])
+		  
+		}
+		$(window).bind('keydown', function(event) {
+			if (event.ctrlKey || event.metaKey) {
+				switch (String.fromCharCode(event.which).toLowerCase()) {
+				case 's':
+					event.preventDefault();
+					
+					let textData = htmlToText($(".editable").html())
+					download(textData, "test.kismet", "text/plain")
+					break;
+				case 'o':
+					event.preventDefault();
+					break;
+				}
+			}
+		});
+    </script>
+</body>
+</html>
